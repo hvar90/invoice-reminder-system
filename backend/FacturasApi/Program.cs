@@ -1,49 +1,48 @@
+using FacturasApi.Services;
+using MongoDB.Driver;
 
-namespace FacturasApi;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Configuración de CORS para Angular[cite: 3]
+builder.Services.AddCors(options =>
 {
-    public static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
+    options.AddPolicy("AllowAngular",
+        policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
 
-        // Add services to the container.
-        builder.Services.AddAuthorization();
+// Configuración MongoDB
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration["MongoDbSettings:ConnectionString"];
+    return new MongoClient(connectionString);
+});
 
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
+builder.Services.AddScoped<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var dbName = builder.Configuration["MongoDbSettings:DatabaseName"];
+    return client.GetDatabase(dbName);
+});
 
-        var app = builder.Build();
+// Inyección de Dependencias
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IFacturaService, FacturaService>();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-        app.UseHttpsRedirection();
+var app = builder.Build();
 
-        app.UseAuthorization();
-
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-        {
-            var forecast =  Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                {
-                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    TemperatureC = Random.Shared.Next(-20, 55),
-                    Summary = summaries[Random.Shared.Next(summaries.Length)]
-                })
-                .ToArray();
-            return forecast;
-        })
-        .WithName("GetWeatherForecast");
-
-        app.Run();
-    }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAngular");
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
