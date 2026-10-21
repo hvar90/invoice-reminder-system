@@ -5,5 +5,6 @@ namespace FacturasApi.Services;
 public interface IFacturaService
 {
     Task<List<Factura>> ObtenerTodasAsync();
-    Task<int> ProcesarRecordatoriosAsync();
+    Task<List<Factura>> ObtenerPorClienteAsync(string clienteId);
+    Task<int> ProcesarRecordatoriosPorClienteAsync(string clienteId);
 }

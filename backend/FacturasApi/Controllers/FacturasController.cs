@@ -22,10 +22,21 @@ public class FacturasController : ControllerBase
         return Ok(facturas);
     }
 
-    [HttpPost("procesar-recordatorios")]
-    public async Task<IActionResult> ProcesarRecordatorios()
+    [HttpGet("cliente/{clienteId}")]
+    public async Task<ActionResult<List<Factura>>> GetPorCliente(string clienteId)
     {
-        int procesadas = await _facturaService.ProcesarRecordatoriosAsync();
-        return Ok(new { mensaje = "Proceso finalizado con éxito", facturasProcesadas = procesadas });
+        var facturas = await _facturaService.ObtenerPorClienteAsync(clienteId);
+        return Ok(facturas);
+    }
+
+    [HttpPost("procesar-recordatorios/{clienteId}")]
+    public async Task<IActionResult> ProcesarRecordatoriosPorCliente(string clienteId)
+    {
+        int procesadas = await _facturaService.ProcesarRecordatoriosPorClienteAsync(clienteId);
+        return Ok(new { 
+            mensaje = $"Proceso finalizado para el cliente {clienteId}", 
+            clienteId = clienteId,
+            facturasProcesadas = procesadas 
+        });
     }
 }
