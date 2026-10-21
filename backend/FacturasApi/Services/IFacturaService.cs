@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using FacturasApi.Models;
 
-namespace FacturasApi.Services
+namespace FacturasApi.Services;
+
+public interface IFacturaService
 {
-    public interface IFacturaService
-    {
-        
-    }
+    Task<List<Factura>> ObtenerTodasAsync();
+    Task<int> ProcesarRecordatoriosAsync();
 }
