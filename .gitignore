@@ -1,10 +1,38 @@
-# .NET
+# ==========================================
+# .NET / Backend
+# ==========================================
 **/bin/
 **/obj/
-.vs/
-.vscode/
+**/.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-# Node / Angular
+# ==========================================
+# Node / Angular / Frontend
+# ==========================================
 **/node_modules/
 **/dist/
-.angular/
+**/.angular/
+**/tmp/
+**/out-tsc/
+**/coverage/
+*.stats.json
+
+# ==========================================
+# IDEs & Editores (VS Code / Visual Studio)
+# ==========================================
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# ==========================================
+# Archivos del Sistema Operativo
+# ==========================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
