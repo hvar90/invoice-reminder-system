@@ -1,3 +1,4 @@
+using FacturasApi.Middlewares;
 using FacturasApi.Services;
 using MongoDB.Driver;
 
@@ -34,6 +35,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Registrar el Middleware de Excepciones
+app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
