@@ -1,7 +1,7 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace FacturasApi.Services;
+namespace InvoicesApi.Services;
 
 public class EmailService : IEmailService
 {
@@ -24,8 +24,7 @@ public class EmailService : IEmailService
 
         using var client = new SmtpClient();
 
-         
-       /*  
+        /*  
         Le indica a MailKit que no falle si la lista de revocación no responde/no se puede comprobar
         es una práctica estándar en entornos donde la infraestructura de red 
         o proveedores en la nube (AWS, Azure, Docker, Heroku) restringen las consultas 
@@ -43,5 +42,3 @@ public class EmailService : IEmailService
         await client.DisconnectAsync(true);
     }
 }
-
-

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FacturasApi\FacturasApi.csproj" />
+    <ProjectReference Include="..\InvoiceApi\FacturasApi.csproj" />
   </ItemGroup>
 
 </Project>

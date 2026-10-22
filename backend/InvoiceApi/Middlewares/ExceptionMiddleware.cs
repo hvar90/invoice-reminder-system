@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
-namespace FacturasApi.Middlewares;
+namespace InvoicesApi.Middlewares;
 
 public class ExceptionMiddleware
 {
@@ -31,7 +31,7 @@ public class ExceptionMiddleware
     {
         context.Response.ContentType = "application/json";
 
-        var (statusCode, mensaje) = exception switch
+        var (statusCode, message) = exception switch
         {
             KeyNotFoundException => ((int)HttpStatusCode.NotFound, exception.Message),
             ArgumentException => ((int)HttpStatusCode.BadRequest, exception.Message),
@@ -41,7 +41,7 @@ public class ExceptionMiddleware
 
         context.Response.StatusCode = statusCode;
 
-        var response = new { mensaje };
+        var response = new { message };
         return context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }

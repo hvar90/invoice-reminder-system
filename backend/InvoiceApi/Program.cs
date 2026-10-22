@@ -1,5 +1,5 @@
-using FacturasApi.Middlewares;
-using FacturasApi.Services;
+using InvoicesApi.Middlewares;
+using InvoicesApi.Services;
 using MongoDB.Driver;
 
 
@@ -28,7 +28,7 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
 
 // Inyección de Dependencias
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IFacturaService, FacturaService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

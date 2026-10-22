@@ -1,14 +1,14 @@
-using FacturasApi.Models;
-using FacturasApi.Services;
+using InvoicesApi.Models;
+using InvoicesApi.Services;
 using Moq;
 
-namespace FacturasApi.Tests;
+namespace InvoicesApi.Tests;
 
-public class FacturaServiceLogicTests
+public class InvoiceServiceLogicTests
 {
     private readonly Mock<IEmailService> _emailServiceMock;
 
-    public FacturaServiceLogicTests()
+    public InvoiceServiceLogicTests()
     {
         _emailServiceMock = new Mock<IEmailService>();
     }
@@ -17,38 +17,38 @@ public class FacturaServiceLogicTests
     public void Test6_ValidacionReglaNegocio_PrimerRecordatorio_PasaASegundoRecordatorio()
     {
         // Arrange
-        var cliente = new Cliente { Id = "650000000000000000000001", Nombre = "Carlos Perez", Email = "carlos@example.com" };
-        var factura = new Factura { Id = "650000000000000000000010", ClienteId = cliente.Id, Monto = 150, Estado = "primerrecordatorio" };
+        var cliente = new Customer { Id = "650000000000000000000001", Name = "Carlos Perez", Email = "carlos@example.com" };
+        var factura = new Invoice { Id = "650000000000000000000010", CustomerId = cliente.Id, Amount = 150, Status = "primerrecordatorio" };
 
         // Act & Assert
-        Assert.Equal("primerrecordatorio", factura.Estado);
+        Assert.Equal("primerrecordatorio", factura.Status);
         
         // Simulación del cambio de estado según la regla de negocio
-        if (factura.Estado == "primerrecordatorio")
+        if (factura.Status == "primerrecordatorio")
         {
-            factura.Estado = "segundorecordatorio";
+            factura.Status = "segundorecordatorio";
         }
 
-        Assert.Equal("segundorecordatorio", factura.Estado);
+        Assert.Equal("segundorecordatorio", factura.Status);
     }
 
     [Fact]
     public void Test7_ValidacionReglaNegocio_SegundoRecordatorio_PasaADesactivado()
     {
         // Arrange
-        var cliente = new Cliente { Id = "650000000000000000000001", Nombre = "Carlos Perez", Email = "carlos@example.com" };
-        var factura = new Factura { Id = "650000000000000000000011", ClienteId = cliente.Id, Monto = 200, Estado = "segundorecordatorio" };
+        var cliente = new Customer { Id = "650000000000000000000001", Name = "Carlos Perez", Email = "carlos@example.com" };
+        var factura = new Invoice { Id = "650000000000000000000011", CustomerId = cliente.Id, Amount = 200, Status = "segundorecordatorio" };
 
         // Act & Assert
-        Assert.Equal("segundorecordatorio", factura.Estado);
+        Assert.Equal("segundorecordatorio", factura.Status);
 
         // Simulación del cambio de estado según la regla de negocio
-        if (factura.Estado == "segundorecordatorio")
+        if (factura.Status == "segundorecordatorio")
         {
-            factura.Estado = "desactivado";
+            factura.Status = "desactivado";
         }
 
-        Assert.Equal("desactivado", factura.Estado);
+        Assert.Equal("desactivado", factura.Status);
     }
 
     [Fact]

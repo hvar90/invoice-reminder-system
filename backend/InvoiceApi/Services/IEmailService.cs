@@ -1,4 +1,4 @@
-namespace FacturasApi.Services;
+namespace InvoicesApi.Services;
 
 public interface IEmailService
 {
