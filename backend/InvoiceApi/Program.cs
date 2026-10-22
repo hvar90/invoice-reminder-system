@@ -29,6 +29,7 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
 // Inyección de Dependencias
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
