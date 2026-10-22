@@ -23,9 +23,25 @@ public class EmailService : IEmailService
         message.Body = new TextPart("html") { Text = body };
 
         using var client = new SmtpClient();
-        await client.ConnectAsync(emailSettings["SmtpServer"], int.Parse(emailSettings["Port"]!), MailKit.Security.SecureSocketOptions.StartTls);
+
+         
+       /*  
+        Le indica a MailKit que no falle si la lista de revocación no responde/no se puede comprobar
+        es una práctica estándar en entornos donde la infraestructura de red 
+        o proveedores en la nube (AWS, Azure, Docker, Heroku) restringen las consultas 
+        de revocación salientes. El certificado SSL del servidor SMTP de Brevo se seguirá auditando 
+        y validando normalmente contra las Entidades Certificadoras (CA) raíz de la máquina. */
+        client.CheckCertificateRevocation = false;
+
+        await client.ConnectAsync(
+            emailSettings["SmtpServer"], 
+            int.Parse(emailSettings["Port"]!), 
+            MailKit.Security.SecureSocketOptions.StartTls
+        );
         await client.AuthenticateAsync(emailSettings["Username"], emailSettings["Password"]);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
     }
 }
+
+
