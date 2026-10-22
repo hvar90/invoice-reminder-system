@@ -23,6 +23,12 @@ public class FacturaService : IFacturaService
 
     public async Task<List<Factura>> ObtenerPorClienteAsync(string clienteId)
     {
+        var cliente = await _clientesCollection.Find(c => c.Id == clienteId).FirstOrDefaultAsync();
+        if (cliente == null)
+        {
+            throw new KeyNotFoundException($"El cliente con ID '{clienteId}' no existe.");
+        }
+
         return await _facturasCollection.Find(f => f.ClienteId == clienteId).ToListAsync();
     }
 
@@ -31,7 +37,7 @@ public class FacturaService : IFacturaService
         var cliente = await _clientesCollection.Find(c => c.Id == clienteId).FirstOrDefaultAsync();
         if (cliente == null)
         {
-            throw new Exception($"El cliente con ID '{clienteId}' no existe.");
+            throw new KeyNotFoundException($"El cliente con ID '{clienteId}' no existe.");
         }
 
         var filter = Builders<Factura>.Filter.And(
@@ -47,6 +53,8 @@ public class FacturaService : IFacturaService
             if (factura.Estado == "primerrecordatorio")
             {
                 string cuerpo = $"Hola {cliente.Nombre}, su factura por ${factura.Monto} ha pasado a <b>segundo recordatorio</b>.";
+                
+                // Si este envío falla, se lanza la excepción, se detiene el bucle y NO se ejecuta el UpdateOneAsync
                 await _emailService.SendEmailAsync(cliente.Email, "Aviso: Segundo Recordatorio de Pago", cuerpo);
 
                 var update = Builders<Factura>.Update.Set(f => f.Estado, "segundorecordatorio");
@@ -56,6 +64,8 @@ public class FacturaService : IFacturaService
             else if (factura.Estado == "segundorecordatorio")
             {
                 string cuerpo = $"Hola {cliente.Nombre}, su factura por ${factura.Monto} no ha sido pagada. Su servicio va a ser <b>desactivado</b>.";
+                
+                // Si este envío falla, se lanza la excepción, se detiene el bucle y NO se ejecuta el UpdateOneAsync
                 await _emailService.SendEmailAsync(cliente.Email, "Urgente: Servicio a Ser Desactivado", cuerpo);
 
                 var update = Builders<Factura>.Update.Set(f => f.Estado, "desactivado");
