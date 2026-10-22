@@ -10,13 +10,8 @@ public class Factura
     public string? Id { get; set; }
 
     [BsonElement("clienteId")]
+    [BsonRepresentation(BsonType.ObjectId)]
     public string ClienteId { get; set; } = string.Empty;
-
-    [BsonElement("nombreCliente")]
-    public string NombreCliente { get; set; } = string.Empty;
-
-    [BsonElement("emailCliente")]
-    public string EmailCliente { get; set; } = string.Empty;
 
     [BsonElement("monto")]
     public decimal Monto { get; set; }
