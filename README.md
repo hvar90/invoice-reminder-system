@@ -91,7 +91,7 @@ erDiagram
 ```
 
 
----
+
 
 ###  Endpoints de la API
 
@@ -160,7 +160,7 @@ La API expone dos controladores principales para gestionar los clientes y las fa
 
 
 
----
+
 
 ###  Cómo visualizar y probar la API con Swagger
 
@@ -244,9 +244,9 @@ npm run test:coverage
 * `app/features/invoices/components`: **98.57%** de statements y **100%** de líneas (`invoice-table` y `client-selector`).
 * `app/features/invoices/pages / invoice-dashboard.component.ts`: **90.69%** de cobertura general de líneas.
 
-Aquí tienes la sección de **Instrucciones de Ejecución** completa y sin cortes para tu `README.md`:
 
----
+
+
 
 ###  Instrucciones de Ejecución
 
