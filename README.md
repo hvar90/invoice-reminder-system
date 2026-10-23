@@ -288,7 +288,7 @@ dotnet run
 
 
 * El servidor iniciará de forma local y podrás acceder a la documentación interactiva de Swagger en tu navegador en:
-👉 **`https://localhost:5085/swagger`**
+ **`http://localhost:5085/swagger`**
 
 #### 3. Ejecutar el Frontend (Angular)
 
