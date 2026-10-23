@@ -8,7 +8,7 @@ import { Invoice, Client } from '../models/invoice.model';
 })
 export class InvoiceService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'http://localhost:5085/api';
 
   // Obtiene los clientes dinámicamente desde MongoDB via CustomersController
   getCustomers(): Observable<Client[]> {

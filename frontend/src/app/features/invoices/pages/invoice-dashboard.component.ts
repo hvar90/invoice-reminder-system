@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { Subject, switchMap, startWith, of, tap } from 'rxjs';
 import { InvoiceService } from '../../../core/services/invoice.service';
 import { Invoice, Client } from '../../../core/models/invoice.model';
 
@@ -12,19 +14,20 @@ import { Invoice, Client } from '../../../core/models/invoice.model';
     <div style="padding: 24px; font-family: Arial, sans-serif;">
       <h2>Invoice Management & Reminder System</h2>
 
-      <!-- Client Combobox (Dynamic from Backend / MongoDB) -->
+      <!-- Client Combobox -->
       <div style="margin-bottom: 20px;">
         <label for="clientSelect" style="font-weight: bold; margin-right: 10px;">Select Client:</label>
-        <select id="clientSelect" [(ngModel)]="selectedClientId" (change)="loadInvoices()" style="padding: 8px; width: 320px;">
+        <!-- Actualizamos el modelo usando un Subject o FormControl reactivo -->
+        <select id="clientSelect" [ngModel]="selectedClientId()" (ngModelChange)="onClientSelected($event)" style="padding: 8px; width: 320px;">
           <option value="" disabled selected>-- Select a client --</option>
-          <option *ngFor="let client of clients" [value]="client.id">
+          <option *ngFor="let client of clients()" [value]="client.id">
             {{ client.name }} ({{ client.email }})
           </option>
         </select>
       </div>
 
       <!-- Process Reminders Action Button -->
-      <div style="margin-bottom: 20px;" *ngIf="selectedClientId">
+      <div style="margin-bottom: 20px;" *ngIf="selectedClientId()">
         <button (click)="processReminders()" [disabled]="processing" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
           {{ processing ? 'Processing...' : 'Process Reminders & Send Emails' }}
         </button>
@@ -32,7 +35,7 @@ import { Invoice, Client } from '../../../core/models/invoice.model';
       </div>
 
       <!-- Invoices Table -->
-      <div *ngIf="selectedClientId">
+      <div *ngIf="selectedClientId()">
         <h3>Invoices for Selected Client</h3>
         <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse;">
           <thead>
@@ -43,7 +46,7 @@ import { Invoice, Client } from '../../../core/models/invoice.model';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let invoice of invoices">
+            <tr *ngFor="let invoice of invoices()">
               <td>{{ invoice.id }}</td>
               <td>$ {{ invoice.amount | number:'1.2-2' }}</td>
               <td>
@@ -52,7 +55,7 @@ import { Invoice, Client } from '../../../core/models/invoice.model';
                 </span>
               </td>
             </tr>
-            <tr *ngIf="invoices.length === 0">
+            <tr *ngIf="invoices().length === 0">
               <td colspan="3" style="text-align: center;">No invoices found for this client.</td>
             </tr>
           </tbody>
@@ -61,53 +64,46 @@ import { Invoice, Client } from '../../../core/models/invoice.model';
     </div>
   `
 })
-export class InvoiceDashboardComponent implements OnInit {
+export class InvoiceDashboardComponent {
   private invoiceService = inject(InvoiceService);
 
-  clients: Client[] = [];
-  selectedClientId: string = '';
-  invoices: Invoice[] = [];
+  // 1. Clientes convertidos directamente a Signal desde el Observable del servicio
+  clients = toSignal(this.invoiceService.getCustomers(), { initialValue: [] });
+
+  // 2. Un Subject que emite cada vez que el usuario cambia de cliente
+  private selectedClientSubject = new Subject<string>();
+  selectedClientId = toSignal(this.selectedClientSubject, { initialValue: '' });
+
+  // 3. Facturas automatizadas: Cada vez que 'selectedClientId' cambia, dispara la petición HTTP sola
+  invoices = toSignal(
+    this.selectedClientSubject.pipe(
+      switchMap(clientId => clientId ? this.invoiceService.getInvoicesByClient(clientId) : of([]))
+    ),
+    { initialValue: [] }
+  );
+
   processing: boolean = false;
   message: string = '';
 
-  ngOnInit(): void {
-    this.loadCustomers();
-  }
-
-  loadCustomers(): void {
-    this.invoiceService.getCustomers().subscribe({
-      next: (data: Client[]) => {
-        this.clients = data;
-      },
-      error: (err: unknown) => {
-        console.error('Error loading customers', err);
-      }
-    });
-  }
-
-  loadInvoices(): void {
-    if (!this.selectedClientId) return;
+  // Método disparado por el cambio en el HTML
+  onClientSelected(clientId: string): void {
     this.message = '';
-    this.invoiceService.getInvoicesByClient(this.selectedClientId).subscribe({
-      next: (data: Invoice[]) => {
-        this.invoices = data;
-      },
-      error: (err: unknown) => {
-        console.error('Error loading invoices', err);
-      }
-    });
+    this.selectedClientSubject.next(clientId); // Emitimos el nuevo ID al flujo reactivo
   }
 
   processReminders(): void {
-    if (!this.selectedClientId) return;
+    const clientId = this.selectedClientId();
+    if (!clientId) return;
+    
     this.processing = true;
     this.message = '';
 
-    this.invoiceService.processReminders(this.selectedClientId).subscribe({
+    this.invoiceService.processReminders(clientId).subscribe({
       next: (response: { message?: string }) => {
         this.processing = false;
         this.message = response?.message || 'Process completed successfully!';
-        this.loadInvoices(); // Recarga las facturas automáticamente para reflejar los nuevos estados
+        // Forzamos una re-emisión en el subject para recargar las facturas del mismo cliente
+        this.selectedClientSubject.next(clientId);
       },
       error: (err: unknown) => {
         this.processing = false;
