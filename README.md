@@ -226,6 +226,7 @@ Las pruebas del frontend validan los componentes visuales, selectores y servicio
 * **Comando de ejecución**:
 ```bash
 cd frontend/
+npm install
 npm run test:coverage
 
 ```
